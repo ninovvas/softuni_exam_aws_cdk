@@ -6,6 +6,7 @@ import {FilterCriteria, FilterRule, Runtime, StartingPosition} from "aws-cdk-lib
 import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
 import {AttributeType, BillingMode, StreamViewType, Table} from "aws-cdk-lib/aws-dynamodb";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
+import {Subscription, SubscriptionProtocol, Topic} from "aws-cdk-lib/aws-sns";
 
 export class ExamStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -43,6 +44,34 @@ export class ExamStack extends cdk.Stack {
       indexName: 'FileExtensionIndex',
       partitionKey: { name: 'fileExtension', type: AttributeType.STRING },
     });
+
+    const metadataTopic = new Topic(this, 'ErrorTopic', {
+      topicName: 'MetadataTopic'
+    });
+
+    const handleUploadFunction  = new NodejsFunction(this, 'HandleUploadFunction', {
+      runtime: Runtime.NODEJS_20_X,
+      handler: 'handler',
+      entry: `${__dirname}/../src/uploadFunction.ts`,
+      environment: {
+        TABLE_NAME: metadataTable.tableName,
+        BUCKET_NAME: uploadBucket.bucketName,
+        TOPIC_ARN: metadataTopic.topicArn,
+      }
+    });
+
+    metadataTopic.grantPublish(handleUploadFunction);
+    metadataTable.grantReadWriteData(handleUploadFunction);
+
+
+
+    new Subscription(this, 'MetadataSubscription', {
+      topic: metadataTopic,
+      protocol: SubscriptionProtocol.EMAIL,
+      endpoint: 'ninov_16@yahoo.com', //hristo.zhelev@yahoo.com
+    });
+
+
 
 
 
