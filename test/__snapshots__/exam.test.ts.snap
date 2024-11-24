@@ -146,7 +146,7 @@ exports[`SQS Queue Created 1`] = `
     },
     "MetadataSubscriptionF5512F80": {
       "Properties": {
-        "Endpoint": "ninov_16@yahoo.com",
+        "Endpoint": "hristo.zhelev@yahoo.com",
         "Protocol": "email",
         "TopicArn": {
           "Ref": "ErrorTopicA0904A23",
