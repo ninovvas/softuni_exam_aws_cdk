@@ -1,0 +1,864 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SQS Queue Created 1`] = `
+{
+  "Parameters": {
+    "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2",
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+    },
+  },
+  "Resources": {
+    "ErrorTopicA0904A23": {
+      "Properties": {
+        "TopicName": "MetadataTopic",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "HandleUploadFunction5AD01CE7": {
+      "DependsOn": [
+        "HandleUploadFunctionServiceRoleDefaultPolicyB973BC62",
+        "HandleUploadFunctionServiceRole8FDEC60D",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "40223558b6c95076c602d8ae116264fb4bf892c05858f342d97d2a7942c1c041.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "BUCKET_NAME": {
+              "Ref": "UploadBucketD2C1DA78",
+            },
+            "TABLE_NAME": {
+              "Ref": "MetadataTable30E05F1F",
+            },
+            "TOPIC_ARN": {
+              "Ref": "ErrorTopicA0904A23",
+            },
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "HandleUploadFunctionServiceRole8FDEC60D",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "HandleUploadFunctionServiceRole8FDEC60D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "HandleUploadFunctionServiceRoleDefaultPolicyB973BC62": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ErrorTopicA0904A23",
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "MetadataTable30E05F1F",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "MetadataTable30E05F1F",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "HandleUploadFunctionServiceRoleDefaultPolicyB973BC62",
+        "Roles": [
+          {
+            "Ref": "HandleUploadFunctionServiceRole8FDEC60D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "MetadataSubscriptionF5512F80": {
+      "Properties": {
+        "Endpoint": "ninov_16@yahoo.com",
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "ErrorTopicA0904A23",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
+    "MetadataTable30E05F1F": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "fileExtension",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "FileExtensionIndex",
+            "KeySchema": [
+              {
+                "AttributeName": "fileExtension",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH",
+          },
+        ],
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "TimeToLiveSpecification": {
+          "AttributeName": "ttl",
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "NotifyFunction0D8C391B": {
+      "DependsOn": [
+        "NotifyFunctionServiceRoleDefaultPolicy412CC480",
+        "NotifyFunctionServiceRoleDF25A23A",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+          },
+          "S3Key": "2480824337807ef84721e63147cbeaaac0f592c703ec200dbbc95f5cf4b1f1ed.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "TOPIC_ARN": {
+              "Ref": "ErrorTopicA0904A23",
+            },
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "NotifyFunctionServiceRoleDF25A23A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "NotifyFunctionDynamoDBEventSourceMyTestStackMetadataTableE2D8C175E361C79B": {
+      "Properties": {
+        "BatchSize": 5,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "MetadataTable30E05F1F",
+            "StreamArn",
+          ],
+        },
+        "FilterCriteria": {
+          "Filters": [
+            {
+              "Pattern": "{"eventName":["REMOVE"]}",
+            },
+          ],
+        },
+        "FunctionName": {
+          "Ref": "NotifyFunction0D8C391B",
+        },
+        "StartingPosition": "LATEST",
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "NotifyFunctionServiceRoleDF25A23A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "NotifyFunctionServiceRoleDefaultPolicy412CC480": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "ErrorTopicA0904A23",
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "MetadataTable30E05F1F",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "MetadataTable30E05F1F",
+                          "Arn",
+                        ],
+                      },
+                      "/index/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "dynamodb:ListStreams",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "MetadataTable30E05F1F",
+                  "StreamArn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "NotifyFunctionServiceRoleDefaultPolicy412CC480",
+        "Roles": [
+          {
+            "Ref": "NotifyFunctionServiceRoleDF25A23A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "UploadBucketD2C1DA78": {
+      "DeletionPolicy": "Delete",
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "WebInterfaceInstance9D208F13": {
+      "DependsOn": [
+        "WebInterfaceInstanceInstanceRoleEBDD26A4",
+      ],
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "IamInstanceProfile": {
+          "Ref": "WebInterfaceInstanceInstanceProfile827BD831",
+        },
+        "ImageId": {
+          "Ref": "SsmParameterValueawsserviceamiamazonlinuxlatestamznamihvmx8664gp2C96584B6F00A464EAD1953AFF4B05118Parameter",
+        },
+        "InstanceType": "t2.micro",
+        "KeyName": "ssh-exam-key",
+        "SecurityGroupIds": [
+          {
+            "Fn::GetAtt": [
+              "WebInterfaceInstanceInstanceSecurityGroup4CF197FA",
+              "GroupId",
+            ],
+          },
+        ],
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet1Subnet30249199",
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceInstance",
+          },
+        ],
+        "UserData": {
+          "Fn::Base64": "#!/bin/bash",
+        },
+      },
+      "Type": "AWS::EC2::Instance",
+    },
+    "WebInterfaceInstanceInstanceProfile827BD831": {
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "WebInterfaceInstanceInstanceRoleEBDD26A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::InstanceProfile",
+    },
+    "WebInterfaceInstanceInstanceRoleEBDD26A4": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceInstance",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WebInterfaceInstanceInstanceSecurityGroup4CF197FA": {
+      "Properties": {
+        "GroupDescription": "MyTestStack/WebInterfaceInstance/InstanceSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceInstance",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::SecurityGroup",
+    },
+    "WebInterfaceVPC9C33BABA": {
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::VPC",
+    },
+    "WebInterfaceVPCIGWA4B13BE5": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::InternetGateway",
+    },
+    "WebInterfaceVPCPrivateSubnet1DefaultRouteDF24F176": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "WebInterfaceVPCPublicSubnet1NATGateway6150B98A",
+        },
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet1RouteTableBF97ACBF",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "WebInterfaceVPCPrivateSubnet1RouteTableAssociation4E637945": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet1RouteTableBF97ACBF",
+        },
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet1Subnet30249199",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "WebInterfaceVPCPrivateSubnet1RouteTableBF97ACBF": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PrivateSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "WebInterfaceVPCPrivateSubnet1Subnet30249199": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.128.0/18",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private",
+          },
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PrivateSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "WebInterfaceVPCPrivateSubnet2DefaultRoute34510FBD": {
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "WebInterfaceVPCPublicSubnet2NATGatewayE2F3996F",
+        },
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet2RouteTable17007606",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "WebInterfaceVPCPrivateSubnet2RouteTable17007606": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PrivateSubnet2",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "WebInterfaceVPCPrivateSubnet2RouteTableAssociation57837340": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet2RouteTable17007606",
+        },
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPrivateSubnet2SubnetD16E6AB0",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "WebInterfaceVPCPrivateSubnet2SubnetD16E6AB0": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.192.0/18",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private",
+          },
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PrivateSubnet2",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "WebInterfaceVPCPublicSubnet1DefaultRouteB8A205C9": {
+      "DependsOn": [
+        "WebInterfaceVPCVPCGW566F32F7",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "WebInterfaceVPCIGWA4B13BE5",
+        },
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPublicSubnet1RouteTable3B72F1B8",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "WebInterfaceVPCPublicSubnet1EIP4B1EFC50": {
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet1",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::EIP",
+    },
+    "WebInterfaceVPCPublicSubnet1NATGateway6150B98A": {
+      "DependsOn": [
+        "WebInterfaceVPCPublicSubnet1DefaultRouteB8A205C9",
+        "WebInterfaceVPCPublicSubnet1RouteTableAssociation76CAEF48",
+      ],
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "WebInterfaceVPCPublicSubnet1EIP4B1EFC50",
+            "AllocationId",
+          ],
+        },
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPublicSubnet1Subnet041C696D",
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet1",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::NatGateway",
+    },
+    "WebInterfaceVPCPublicSubnet1RouteTable3B72F1B8": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "WebInterfaceVPCPublicSubnet1RouteTableAssociation76CAEF48": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPublicSubnet1RouteTable3B72F1B8",
+        },
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPublicSubnet1Subnet041C696D",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "WebInterfaceVPCPublicSubnet1Subnet041C696D": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.0.0/18",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public",
+          },
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet1",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "WebInterfaceVPCPublicSubnet2DefaultRoute62656A0D": {
+      "DependsOn": [
+        "WebInterfaceVPCVPCGW566F32F7",
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "WebInterfaceVPCIGWA4B13BE5",
+        },
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPublicSubnet2RouteTableE51CDEA1",
+        },
+      },
+      "Type": "AWS::EC2::Route",
+    },
+    "WebInterfaceVPCPublicSubnet2EIP82A27BC4": {
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet2",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::EIP",
+    },
+    "WebInterfaceVPCPublicSubnet2NATGatewayE2F3996F": {
+      "DependsOn": [
+        "WebInterfaceVPCPublicSubnet2DefaultRoute62656A0D",
+        "WebInterfaceVPCPublicSubnet2RouteTableAssociationDAAE82D1",
+      ],
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "WebInterfaceVPCPublicSubnet2EIP82A27BC4",
+            "AllocationId",
+          ],
+        },
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPublicSubnet2SubnetA9EFBC28",
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet2",
+          },
+        ],
+      },
+      "Type": "AWS::EC2::NatGateway",
+    },
+    "WebInterfaceVPCPublicSubnet2RouteTableAssociationDAAE82D1": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "WebInterfaceVPCPublicSubnet2RouteTableE51CDEA1",
+        },
+        "SubnetId": {
+          "Ref": "WebInterfaceVPCPublicSubnet2SubnetA9EFBC28",
+        },
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+    },
+    "WebInterfaceVPCPublicSubnet2RouteTableE51CDEA1": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet2",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::RouteTable",
+    },
+    "WebInterfaceVPCPublicSubnet2SubnetA9EFBC28": {
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": "",
+            },
+          ],
+        },
+        "CidrBlock": "10.0.64.0/18",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public",
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public",
+          },
+          {
+            "Key": "Name",
+            "Value": "MyTestStack/WebInterfaceVPC/PublicSubnet2",
+          },
+        ],
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::Subnet",
+    },
+    "WebInterfaceVPCVPCGW566F32F7": {
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "WebInterfaceVPCIGWA4B13BE5",
+        },
+        "VpcId": {
+          "Ref": "WebInterfaceVPC9C33BABA",
+        },
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+    },
+  },
+}
+`;
