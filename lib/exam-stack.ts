@@ -81,7 +81,7 @@ export class ExamStack extends cdk.Stack {
     new Subscription(this, 'MetadataSubscription', {
       topic: metadataTopic,
       protocol: SubscriptionProtocol.EMAIL,
-      endpoint: 'ninov_16@yahoo.com', //hristo.zhelev@yahoo.com
+      endpoint: 'hristo.zhelev@yahoo.com',
     });
 
     notifyFunction.addEventSource(new DynamoEventSource(metadataTable, {
