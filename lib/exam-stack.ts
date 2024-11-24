@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import {Bucket} from "aws-cdk-lib/aws-s3";
+import {Vpc, Instance, InstanceType, InstanceClass, InstanceSize, MachineImage} from 'aws-cdk-lib/aws-ec2';
 import {FilterCriteria, FilterRule, Runtime, StartingPosition} from "aws-cdk-lib/aws-lambda";
 import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
 import {AttributeType, BillingMode, StreamViewType, Table} from "aws-cdk-lib/aws-dynamodb";
@@ -10,7 +11,18 @@ export class ExamStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // S3 Bucket for file uploads
+    // VPC for EC2
+    const vpc = new Vpc(this, 'WebInterfaceVPC', {
+      maxAzs: 2,
+    });
+
+    // EC2 Instance for web interface
+    const ec2Instance = new Instance(this, 'WebInterfaceInstance', {
+      vpc,
+      instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.MICRO),
+      machineImage: MachineImage.latestAmazonLinux(),
+      keyName: 'ssh-exam-key',
+    });
 
 
     // S3 Bucket
@@ -31,6 +43,7 @@ export class ExamStack extends cdk.Stack {
       indexName: 'FileExtensionIndex',
       partitionKey: { name: 'fileExtension', type: AttributeType.STRING },
     });
+
 
 
 
