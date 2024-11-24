@@ -7,6 +7,7 @@ import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
 import {AttributeType, BillingMode, StreamViewType, Table} from "aws-cdk-lib/aws-dynamodb";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 import {Subscription, SubscriptionProtocol, Topic} from "aws-cdk-lib/aws-sns";
+import {DynamoEventSource} from "aws-cdk-lib/aws-lambda-event-sources";
 
 export class ExamStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,6 +38,7 @@ export class ExamStack extends cdk.Stack {
       partitionKey: { name: 'id', type: AttributeType.STRING },
       timeToLiveAttribute: 'ttl', // TTL attribute for automatic expiration
       billingMode: BillingMode.PAY_PER_REQUEST,
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
     });
 
     // Secondary index for querying by file extension
@@ -60,8 +62,19 @@ export class ExamStack extends cdk.Stack {
       }
     });
 
+    const notifyFunction  = new NodejsFunction(this, 'NotifyFunction', {
+      runtime: Runtime.NODEJS_20_X,
+      handler: 'handler',
+      entry: `${__dirname}/../src/notifyFunction.ts`,
+      environment: {
+        TOPIC_ARN: metadataTopic.topicArn,
+      }
+    });
+
     metadataTopic.grantPublish(handleUploadFunction);
+    metadataTopic.grantPublish(notifyFunction);
     metadataTable.grantReadWriteData(handleUploadFunction);
+    metadataTable.grantReadWriteData(notifyFunction);
 
 
 
@@ -71,10 +84,15 @@ export class ExamStack extends cdk.Stack {
       endpoint: 'ninov_16@yahoo.com', //hristo.zhelev@yahoo.com
     });
 
-
-
-
-
+    notifyFunction.addEventSource(new DynamoEventSource(metadataTable, {
+      startingPosition: StartingPosition.LATEST,
+      batchSize: 5,
+      filters: [
+        FilterCriteria.filter({
+          eventName: FilterRule.isEqual('REMOVE'),
+        })
+      ]
+    }));
 
 
   }

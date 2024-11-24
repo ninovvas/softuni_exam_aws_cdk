@@ -7,7 +7,6 @@ const dynamoDBClient = new DynamoDBClient({});
 
 export const handler = async (event: any) => {
     const tableName = process.env.TABLE_NAME;
-    const bucketName = process.env.BUCKET_NAME;
     const topicArn = process.env.TOPIC_ARN;
     const allowedExtensions = ['pdf', 'jpg', 'png'];
 
@@ -62,18 +61,6 @@ export const handler = async (event: any) => {
                     }
                 }}
         ))
-
-        // Send a notification if the data are save in the database
-
-        //Publish to SNS
-        const message = `Success: The following data are save successfully to the data base:
-        The file extension is ${fileExtension}, This file size is ${fileSize} and the data of upload is
-        ${uploadTimestamp}`;
-
-        await snsClient.send(new PublishCommand({
-            TopicArn: topicArn,
-            Message: message,
-        }));
 
 
         console.log(`Metadata stored for valid file: ${objectKey}`);
